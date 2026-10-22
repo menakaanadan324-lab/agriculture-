@@ -1,0 +1,379 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Agriculture Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f0;
+            color: #26352a;
+        }
+
+        header {
+            background: #176b3a;
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fit, minmax(180px, 1fr)
+            );
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: white;
+            padding: 18px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #00000012;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #176b3a;
+        }
+
+        .metric {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        input, select, button {
+            padding: 10px;
+            border: 1px solid #b8c7ba;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #176b3a;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background: #10532c;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fit, minmax(230px, 1fr)
+            );
+            gap: 18px;
+        }
+
+        .field-card {
+            border-top: 5px solid #176b3a;
+        }
+
+        .low {
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .normal {
+            color: #176b3a;
+            font-weight: bold;
+        }
+
+        .warning {
+            background: #fff0e8;
+            border-left: 5px solid #e67e22;
+        }
+
+        .recommendation {
+            margin-top: 24px;
+        }
+
+        .recommendation li {
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 8px;
+            border-radius: 5px;
+            background: #e7f5e9;
+            color: #176b3a;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #526354;
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <h1>🌱 Smart Agriculture Dashboard</h1>
+    <p>Smart Irrigation and Water Resource Optimization</p>
+</header>
+
+<main class="container">
+
+    <section class="summary">
+        <div class="card">
+            <h3>Total Fields</h3>
+            <div class="metric" id="totalFields">5</div>
+        </div>
+
+        <div class="card">
+            <h3>Total Daily Water</h3>
+            <div class="metric" id="totalWater">0 L</div>
+        </div>
+
+        <div class="card">
+            <h3>Fields Requiring Irrigation</h3>
+            <div class="metric" id="irrigationCount">0</div>
+        </div>
+
+        <div class="card">
+            <h3>Water-Saving Target</h3>
+            <div class="metric">20%</div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Field Monitoring</h2>
+
+        <div class="controls">
+            <input
+                type="text"
+                id="search"
+                placeholder="Search field ID..."
+            >
+
+            <select id="cropFilter">
+                <option value="All">All Crops</option>
+                <option value="Rice">Rice</option>
+                <option value="Wheat">Wheat</option>
+                <option value="Maize">Maize</option>
+                <option value="Cotton">Cotton</option>
+                <option value="Sugarcane">Sugarcane</option>
+            >
+
+            </select>
+        </div>
+
+        <div class="field-grid" id="fieldGrid"></div>
+    </section>
+
+    <section class="card recommendation">
+        <h2>Prioritized Irrigation Recommendations</h2>
+        <ol id="recommendations"></ol>
+    </section>
+
+    <section class="card recommendation">
+        <h2>Water Analytics</h2>
+        <p id="waterAnalytics"></p>
+        <p id="completionStatus"></p>
+        <p id="nextSchedule"></p>
+    </section>
+
+</main>
+
+<footer>
+    Smart Agriculture Research Centre | Sample Sensor Data
+</footer>
+
+<script>
+    const fields = [
+        {
+            id: "F001",
+            crop: "Rice",
+            moisture: 24,
+            water: 1200,
+            temperature: 31,
+            status: "Pending",
+            health: "Good",
+            next: "Today, 3:00 PM"
+        },
+        {
+            id: "F002",
+            crop: "Wheat",
+            moisture: 42,
+            water: 800,
+            temperature: 27,
+            status: "Completed",
+            health: "Healthy",
+            next: "Tomorrow, 7:00 AM"
+        },
+        {
+            id: "F003",
+            crop: "Maize",
+            moisture: 18,
+            water: 950,
+            temperature: 34,
+            status: "Pending",
+            health: "Needs Attention",
+            next: "Today, 2:00 PM"
+        },
+        {
+            id: "F004",
+            crop: "Cotton",
+            moisture: 35,
+            water: 700,
+            temperature: 29,
+            status: "Completed",
+            health: "Healthy",
+            next: "Tomorrow, 8:00 AM"
+        },
+        {
+            id: "F005",
+            crop: "Sugarcane",
+            moisture: 28,
+            water: 1100,
+            temperature: 32,
+            status: "Pending",
+            health: "Good",
+            next: "Today, 4:00 PM"
+        }
+    ];
+
+    function renderDashboard() {
+        const searchValue =
+            document.getElementById("search")
+                .value.toLowerCase();
+
+        const cropValue =
+            document.getElementById("cropFilter").value;
+
+        const filteredFields = fields.filter(field => {
+            const matchesSearch =
+                field.id.toLowerCase().includes(searchValue);
+
+            const matchesCrop =
+                cropValue === "All" ||
+                field.crop === cropValue;
+
+            return matchesSearch && matchesCrop;
+        });
+
+        document.getElementById("fieldGrid").innerHTML =
+            filteredFields.map(field => {
+                const needsWater = field.moisture < 30;
+
+                return `
+                    <div class="card field-card
+                        ${needsWater ? "warning" : ""}">
+
+                        <h3>${field.id} - ${field.crop}</h3>
+
+                        <p>
+                            Soil Moisture:
+                            <strong class="${needsWater ? "low" : "normal"}">
+                                ${field.moisture}%
+                            </strong>
+                        </p>
+
+                        <p>Daily Water: ${field.water} L</p>
+
+                        <p>Temperature: ${field.temperature}°C</p>
+
+                        <p>
+                            Irrigation:
+                            <span class="status">
+                                ${field.status}
+                            </span>
+                        </p>
+
+                        <p>Crop Health: ${field.health}</p>
+
+                        <p>Next Schedule: ${field.next}</p>
+
+                        ${
+                            needsWater
+                            ? `<button onclick="completeIrrigation('${field.id}')">
+                                Mark Irrigation Complete
+                               </button>`
+                            : ""
+                        }
+                    </div>
+                `;
+            }).join("");
+
+        const totalWater = fields.reduce(
+            (sum, field) => sum + field.water, 0
+        );
+
+        const irrigationFields = fields
+            .filter(field => field.moisture < 30);
+
+        document.getElementById("totalFields").textContent =
+            fields.length;
+
+        document.getElementById("totalWater").textContent =
+            totalWater.toLocaleString() + " L";
+
+        document.getElementById("irrigationCount").textContent =
+            irrigationFields.length;
+
+        const recommendations = [...irrigationFields]
+            .sort((a, b) => a.moisture - b.moisture);
+
+        document.getElementById("recommendations").innerHTML =
+            recommendations.length
+            ? recommendations.map(field => `
+                <li>
+                    <strong>${field.id} (${field.crop})</strong>:
+                    Soil moisture is ${field.moisture}%.
+                    Prioritize irrigation. Scheduled for ${field.next}.
+                </li>
+            `).join("")
+            : "<li>No fields currently require irrigation.</li>";
+
+        const averageMoisture = fields.reduce(
+            (sum, field) => sum + field.moisture, 0
+        ) / fields.length;
+
+        document.getElementById("waterAnalytics").textContent =
+            `Total water consumption: ${totalWater} L. ` +
+            `Average soil moisture: ${averageMoisture.toFixed(1)}%. ` +
+            `Lowest soil moisture: ${[...fields].sort(
+                (a, b) => a.moisture - b.moisture
+            )[0].id}. ` +
+            `Target: reduce water consumption by 20%.`;
+
+        const completed = fields.filter(
+            field => field.status === "Completed"
+        ).length;
+
+        document.getElementById("completionStatus").textContent =
+            `Irrigation completion status: ${completed}/${fields.length} fields completed.`;
+
+        document.getElementById("nextSchedule").textContent =
+```
